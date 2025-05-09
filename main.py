@@ -2,7 +2,7 @@ import os
 import urllib.request
 import zipfile
 import psycopg2
-from dotenv import load_dotenv, dotenv_values 
+from dotenv import load_dotenv
 import io
 
 releases = [
@@ -23,7 +23,7 @@ def db_connect():
         raise 
     
        
-def download():
+def download_artifacts():
     for release in releases:
         url      = "https://www.hl7.org/fhir/" + release + "/definitions.xml.zip"
         filename = "assets/" + release + "/definitions.xml.zip"
@@ -39,7 +39,6 @@ def upload_artifacts():
     files = [
         "conceptmaps.xml",
         "dataelements.xml",
-        # "extension-definitions.xml",
         "profiles-others.xml",
         "profiles-resources.xml",
         "profiles-types.xml",
@@ -56,15 +55,47 @@ def upload_artifacts():
                 path = "assets/" + dirname + "/" + filename
             with io.open(path,'r',encoding='utf8') as f:
                 data = f.read()
-                cur.execute("insert into fhir.artifacts(release,filename,file) values(%s,%s,%s) on conflict (release,filename) do update set file=%s",
+                cur.execute("insert into fhir.artifacts(release,filename,file) " \
+                               " values(%s,%s,%s) " \
+                               " on conflict (release,filename) " \
+                               " do update set file=%s",
                     (dirname, filename, data, data))
                 conn.commit()
                 print("File '" + path + "' uploaded to the database")
 
+def exec_script(conn, path):
+    with io.open(path,'r',encoding='utf8') as f:
+        script = f.read()
+        cur = conn.cursor()
+        cur.execute(script)
+        conn.commit()
+    print("SQL script '" + path + "' exec success")
+
+def create_schema():
+    conn = db_connect()
+    exec_script(conn, "sql/Scripts/fhir/schemas/s_schema.sql")
+    exec_script(conn, "sql/Scripts/fhir/tables/t_artifacts.sql")
+
+def exec_scripts():
+    conn = db_connect()
+    
+    exec_script(conn, "sql/Scripts/fhir/views/v_simple_types.sql")
+    exec_script(conn, "sql/Scripts/fhir/views/v_resources.sql")
+
+    exec_script(conn, "sql/Scripts/fhir/functions/f_element_belongs_to.sql")
+    exec_script(conn, "sql/Scripts/fhir/functions/f_extract_types.sql")
+    exec_script(conn, "sql/Scripts/fhir/functions/f_get_root_name.sql")
+    exec_script(conn, "sql/Scripts/fhir/functions/f_get_short_name.sql")
+    exec_script(conn, "sql/Scripts/fhir/functions/f_resolve_type.sql")
+
+    exec_script(conn, "sql/Scripts/fhir/views/v_elements.sql")
+    exec_script(conn, "sql/Scripts/fhir/views/v_backbones.sql")
 
 def main():
     load_dotenv() 
-    download()
+    download_artifacts()
+    create_schema()
     upload_artifacts()
+    exec_scripts()
     
 main()
