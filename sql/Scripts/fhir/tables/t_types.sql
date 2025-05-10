@@ -1,6 +1,6 @@
-drop view if exists fhir.v_types cascade;
+drop table if exists fhir.types cascade;
 
-create or replace view fhir.v_types
+create table fhir.types
 as
 
 /* SIMPLE AND COMPLEX TYPES */
@@ -25,7 +25,7 @@ as
 	    purpose              text path 'fhir:purpose/@value',
 	    fhir_version         text path 'fhir:fhirVersion/@value',
 	    kind                 text path 'fhir:kind/@value',
-      abstract             text path 'fhir:abstract/@value',
+      abstract             boolean path 'boolean(fhir:abstract/@value)',
 	    type                 text path 'fhir:type/@value',
 	    base_definition      text path 'fhir:baseDefinition/@value',
 	    derivation           text path 'fhir:derivation/@value'
@@ -56,7 +56,7 @@ union
       purpose                text path 'fhir:purpose/@value',
       fhir_version           text path 'fhir:fhirVersion/@value',
       kind                   text path 'fhir:kind/@value',
-      abstract               text path 'fhir:abstract/@value',
+      abstract               boolean path 'boolean(fhir:abstract/@value)',
       type                   text path 'fhir:type/@value',
       base_definition        text path 'fhir:baseDefinition/@value',
       derivation             text path 'fhir:derivation/@value'
@@ -99,7 +99,7 @@ union
 	       null::text                                      as purpose,
 	       backbones.fhir_version                          as fhir_version,
 	       'backbone'::text                                as kind,
-	       'false'::text                                   as abstract,
+	       false                                           as abstract,
 	       backbones.id                                    as type,
 	       null::text                                      as base_definition,
 	       null::text                                      as derivation,
@@ -107,5 +107,13 @@ union
          regexp_substr(backbones.id, '^([^.]+)')         as root_type_id   -- for ValueSet.compose.include.concept.designation -> ValueSet
 	  from tmp backbones
 	 where backbones.type = 'BackboneElement'
-)
+);
+
+create index ix_types_release on fhir.types(release);
+create index ix_types_fhir_version on fhir.types(fhir_version);
+create index ix_types_id on fhir.types(id);
+create index ix_types_url on fhir.types(url);
+create index ix_types_name on fhir.types(name);
+create index ix_types_owner_type_id on fhir.types(owner_type_id);
+create index ix_types_root_type_id on fhir.types(root_type_id);
 

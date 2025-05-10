@@ -86,22 +86,18 @@ def create_schema():
     conn = db_connect()
     exec_script(conn, "sql/Scripts/fhir/schemas/s_schema.sql")
     exec_script(conn, "sql/Scripts/fhir/tables/t_artifacts.sql")
-    exec_script(conn, "sql/Scripts/fhir/views/v_types.sql")
-    exec_script(conn, "sql/Scripts/fhir/functions/f_element_belongs_to.sql")
-    exec_script(conn, "sql/Scripts/fhir/functions/f_extract_types.sql")
-    exec_script(conn, "sql/Scripts/fhir/functions/f_resolve_type.sql")
-    exec_script(conn, "sql/Scripts/fhir/views/v_elements.sql")
 
-def materialize_views():
+def create_tables():
     conn = db_connect()
-    exec_script(conn, "sql/Scripts/fhir/views/mv_types.sql")
-    exec_script(conn, "sql/Scripts/fhir/views/mv_elements.sql")    
+    exec_script(conn, "sql/Scripts/fhir/tables/t_types.sql")
+    exec_script(conn, "sql/Scripts/fhir/tables/t_elements.sql")    
+    exec_script(conn, "sql/Scripts/fhir/tables/t_element_types.sql") 
 
 def main():
     load_dotenv() 
     create_schema()
     download_artifacts()
     upload_artifacts()
-    materialize_views()
+    create_tables()
     
 main()
