@@ -15,7 +15,7 @@ releases = [
 def get_db_schema() -> str:
     schema = os.getenv("SCHEMA")
     if (not schema):
-        return "public"
+        schema = "public"
     return schema
        
 def db_connect():
