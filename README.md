@@ -10,19 +10,41 @@ This project is designed to transform HL7 FHIR standard release models into a re
 
 ```sql
 select t.*
-  from fhir.mv_simple_types t
- where t.fhirRelease = 'R4'
+  from fhir.types t
+ where t.release = 'R4'
+   and t.kind = 'primitive-type'
+```
+
+**Select a list of FHIR resources**
+
+```sql
+select t.*
+  from fhir.types t
+ where t.release = 'R4'
+   and t.kind = 'resource'
 ```
 
 **Select a list of FHIR elements of the Patient resource**
 
 ```sql
-select e.*
-  from fhir.mv_elements e
- where e.fhirRelease = 'R5'
-   and e.owner_id = 'Patient'
- order by e.pos
+select t.*
+  from fhir.elements t
+ where t.release = 'R5'
+   and t.owner_id = 'Patient'
+   and t.kind = 'differential'
+ order by t.position
 ```
+
+**Select a list of possible types of the R5 Encounter.subject element**
+
+```sql
+select t.*
+  from fhir.element_types t
+ where t.release = 'R5'
+   and t.kind = 'snapshot'
+   and t.id = 'Encounter.subject'
+```
+
 
 
 
