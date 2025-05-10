@@ -29,7 +29,7 @@ begin
                                       fhir:targetProfile[3]/@value,"|",
                                       fhir:targetProfile[4]/@value,"|",
                                       fhir:targetProfile[5]/@value,"|",
-									  fhir:targetProfile[6]/@value,"|",
+									                    fhir:targetProfile[6]/@value,"|",
                                       fhir:targetProfile[7]/@value,"|",
                                       fhir:targetProfile[8]/@value,"|",
                                       fhir:targetProfile[9]/@value,"|",

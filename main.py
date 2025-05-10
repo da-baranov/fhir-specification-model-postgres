@@ -1,9 +1,9 @@
-import os
-import urllib.request
-import zipfile
-import psycopg2
 from dotenv import load_dotenv
 import io
+import os
+import psycopg2
+import urllib.request
+import zipfile
 
 releases = [
     # "STU3", 
@@ -11,6 +11,12 @@ releases = [
     "R4B",
     "R5"
 ]
+
+def get_db_schema() -> str:
+    schema = os.getenv("SCHEMA")
+    if (not schema):
+        return "public"
+    return schema
        
 def db_connect():
     try:
@@ -64,8 +70,13 @@ def upload_artifacts():
                 print("File '" + path + "' uploaded to the database")
 
 def exec_script(conn, path):
+    schema = get_db_schema()
     with io.open(path,'r',encoding='utf8') as f:
         script = f.read()
+        script = script.replace("create schema if not exists fhir", "create schema if not exists " + schema)
+        script = script.replace(" fhir.", " " + schema + ".")
+        print("SQL: " + script)
+
         cur = conn.cursor()
         cur.execute(script)
         conn.commit()
@@ -75,27 +86,22 @@ def create_schema():
     conn = db_connect()
     exec_script(conn, "sql/Scripts/fhir/schemas/s_schema.sql")
     exec_script(conn, "sql/Scripts/fhir/tables/t_artifacts.sql")
-
-def exec_scripts():
-    conn = db_connect()
-    
-    exec_script(conn, "sql/Scripts/fhir/views/v_simple_types.sql")
-    exec_script(conn, "sql/Scripts/fhir/views/v_resources.sql")
-
+    exec_script(conn, "sql/Scripts/fhir/views/v_types.sql")
     exec_script(conn, "sql/Scripts/fhir/functions/f_element_belongs_to.sql")
     exec_script(conn, "sql/Scripts/fhir/functions/f_extract_types.sql")
-    exec_script(conn, "sql/Scripts/fhir/functions/f_get_root_name.sql")
-    exec_script(conn, "sql/Scripts/fhir/functions/f_get_short_name.sql")
     exec_script(conn, "sql/Scripts/fhir/functions/f_resolve_type.sql")
-
     exec_script(conn, "sql/Scripts/fhir/views/v_elements.sql")
-    exec_script(conn, "sql/Scripts/fhir/views/v_backbones.sql")
+
+def materialize_views():
+    conn = db_connect()
+    exec_script(conn, "sql/Scripts/fhir/views/mv_types.sql")
+    exec_script(conn, "sql/Scripts/fhir/views/mv_elements.sql")    
 
 def main():
     load_dotenv() 
-    download_artifacts()
     create_schema()
+    download_artifacts()
     upload_artifacts()
-    exec_scripts()
+    materialize_views()
     
 main()
