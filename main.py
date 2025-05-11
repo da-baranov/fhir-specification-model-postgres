@@ -6,7 +6,7 @@ import urllib.request
 import zipfile
 
 releases = [
-    "STU3", 
+    # "STU3", 
     "R4", 
     "R4B",
     "R5"
@@ -50,7 +50,7 @@ def upload_artifacts():
         "profiles-types.xml",
         "search-parameters.xml"
     ]
-    
+    schema = get_db_schema()
     conn = db_connect()
     cur = conn.cursor()
     for dirname in releases:
@@ -61,7 +61,7 @@ def upload_artifacts():
                 path = "assets/" + dirname + "/" + filename
             with io.open(path,'r',encoding='utf8') as f:
                 data = f.read()
-                cur.execute("insert into fhir.artifacts(release,filename,file) " \
+                cur.execute("insert into " + schema + ".fhir_artifacts(release,filename,file) " \
                                " values(%s,%s,%s) " \
                                " on conflict (release,filename) " \
                                " do update set file=%s",
@@ -83,25 +83,25 @@ def exec_script(conn, path):
 
 def create_schema():
     conn = db_connect()
-    exec_script(conn, "sql/Scripts/fhir/0000_s_schema.sql")
-    exec_script(conn, "sql/Scripts/fhir/0010_t_artifacts.sql")
+    exec_script(conn, "sql/Scripts/fhir/0000_s_fhir_schema.sql")
+    exec_script(conn, "sql/Scripts/fhir/0010_t_fhir_artifacts.sql")
 
 def create_tables():
     conn = db_connect()
-    exec_script(conn, "sql/Scripts/fhir/0020_t_types.sql")
-    exec_script(conn, "sql/Scripts/fhir/0030_t_elements.sql")    
-    exec_script(conn, "sql/Scripts/fhir/0040_t_element_types.sql") 
-    exec_script(conn, "sql/Scripts/fhir/0050_t_search_params.sql")
-    exec_script(conn, "sql/Scripts/fhir/0060_t_search_param_target_types.sql")
-    exec_script(conn, "sql/Scripts/fhir/0070_t_interactions.sql")
-    exec_script(conn, "sql/Scripts/fhir/0080_t_operations.sql")
-    exec_script(conn, "sql/Scripts/fhir/0090_t_operation_params.sql")
+    exec_script(conn, "sql/Scripts/fhir/0020_t_fhir_types.sql")
+    exec_script(conn, "sql/Scripts/fhir/0030_t_fhir_elements.sql")    
+    exec_script(conn, "sql/Scripts/fhir/0040_t_fhir_element_types.sql") 
+    exec_script(conn, "sql/Scripts/fhir/0050_t_fhir_search_params.sql")
+    exec_script(conn, "sql/Scripts/fhir/0060_t_fhir_search_param_target_types.sql")
+    exec_script(conn, "sql/Scripts/fhir/0070_t_fhir_interactions.sql")
+    exec_script(conn, "sql/Scripts/fhir/0080_t_fhir_operations.sql")
+    exec_script(conn, "sql/Scripts/fhir/0090_t_fhir_operation_params.sql")
 
 def main():
     load_dotenv() 
-    # create_schema()
-    # download_artifacts()
-    upload_artifacts()
+    create_schema()
+    #download_artifacts()
+    #upload_artifacts()
     create_tables()
     
 main()

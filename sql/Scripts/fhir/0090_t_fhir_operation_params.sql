@@ -1,6 +1,6 @@
-drop table if exists fhir.operation_params cascade;
+drop table if exists fhir.fhir_operation_params cascade;
 
-create table fhir.operation_params as
+create table fhir.fhir_operation_params as
 select 
     a.release,
     p.id,
@@ -13,7 +13,7 @@ select
     p.search_type,
     t1.resource
   from 
-    fhir.artifacts a,
+    fhir.fhir_artifacts a,
     xmltable
     (
       xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:OperationDefinition/fhir:parameter' 
@@ -45,7 +45,7 @@ select
     and t1.resource is not null
     and t1.resource <> '';
 
-create index ix_operation_params_release    on fhir.operation_params(release);
-create index ix_operation_params_id         on fhir.operation_params(id);
-create index ix_operation_params_name       on fhir.operation_params(name);
-create index ix_operation_params_resource   on fhir.operation_params(resource);
+create index ix_fhir_operation_params_release    on fhir.fhir_operation_params(release);
+create index ix_fhir_operation_params_id         on fhir.fhir_operation_params(id);
+create index ix_fhir_operation_params_name       on fhir.fhir_operation_params(name);
+create index ix_fhir_operation_params_resource   on fhir.fhir_operation_params(resource);

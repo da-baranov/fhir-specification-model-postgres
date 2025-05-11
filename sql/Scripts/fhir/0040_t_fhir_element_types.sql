@@ -1,11 +1,11 @@
-drop table if exists fhir.element_types cascade;
+drop table if exists fhir.fhir_element_types cascade;
 
-create table fhir.element_types as
+create table fhir.fhir_element_types as
 with codes as
 (
   select a.release,
          x.*
-    from fhir.artifacts a,
+    from fhir.fhir_artifacts a,
     xmltable
     (
       xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition/*/fhir:element/fhir:type' 
@@ -21,7 +21,7 @@ target_profiles as
 (
   select a.release,
          x.*
-    from fhir.artifacts a,
+    from fhir.fhir_artifacts a,
     xmltable
     (
       xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition/*/fhir:element/fhir:type/fhir:targetProfile' 
@@ -53,9 +53,9 @@ select t.release,
     on (t.id = t1.id and t.release = t1.release and t.kind = t1.kind);
   
 
-create index ix_element_types_release on fhir.element_types(release);
-create index ix_element_types_id on fhir.element_types(id);
-create index ix_element_types_kind on fhir.element_types(kind);
-create index ix_element_types_code on fhir.element_types(code);
-create index ix_element_types_target_profile on fhir.element_types(target_profile);
-create index ix_element_types_target_resource on fhir.element_types(target_resource);
+create index ix_fhir_element_types_types_release         on fhir.fhir_element_types(release);
+create index ix_fhir_element_types_types_id              on fhir.fhir_element_types(id);
+create index ix_fhir_element_types_types_kind            on fhir.fhir_element_types(kind);
+create index ix_fhir_element_types_types_code            on fhir.fhir_element_types(code);
+create index ix_fhir_element_types_types_target_profile  on fhir.fhir_element_types(target_profile);
+create index ix_fhir_element_types_types_target_resource on fhir.fhir_element_types(target_resource);

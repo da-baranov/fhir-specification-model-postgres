@@ -1,6 +1,6 @@
-drop table if exists fhir.search_params cascade;
+drop table if exists fhir.fhir_search_params cascade;
 
-create table fhir.search_params
+create table fhir.fhir_search_params
 as
   select 
     a.release              as release,
@@ -17,7 +17,7 @@ as
     x.processing_mode,
     t1.*
   from 
-  fhir.artifacts a,
+  fhir.fhir_artifacts a,
   xmltable
   (
     xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:SearchParameter' 
@@ -63,9 +63,9 @@ as
     and t1.base <> '';
 
 
-create index idx_search_params_id   on fhir.search_params(id);
-create index idx_search_params_url  on fhir.search_params(url);
-create index idx_search_params_name on fhir.search_params(name);
-create index idx_search_params_code on fhir.search_params(code);
-create index idx_search_params_base on fhir.search_params(base);
-create index idx_search_params_type on fhir.search_params(type);
+create index idx_fhir_search_params_id   on fhir.fhir_search_params(id);
+create index idx_fhir_search_params_url  on fhir.fhir_search_params(url);
+create index idx_fhir_search_params_name on fhir.fhir_search_params(name);
+create index idx_fhir_search_params_code on fhir.fhir_search_params(code);
+create index idx_fhir_search_params_base on fhir.fhir_search_params(base);
+create index idx_fhir_search_params_type on fhir.fhir_search_params(type);

@@ -1,6 +1,6 @@
-drop table if exists fhir.operations cascade;
+drop table if exists fhir.fhir_operations cascade;
 
-create table fhir.operations as
+create table fhir.fhir_operations as
 select 
     a.release,
     op.id,
@@ -21,7 +21,7 @@ select
     op.type,
     op.instance
   from 
-    fhir.artifacts a,
+    fhir.fhir_artifacts a,
     xmltable
     (
       xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:OperationDefinition' 
@@ -61,8 +61,8 @@ select
     and t1.resource is not null
     and t1.resource <> '';
 
-create index ix_operations_id         on fhir.operations(id);
-create index ix_operations_release    on fhir.operations(release);
-create index ix_operations_name       on fhir.operations(name);
-create index ix_operations_code       on fhir.operations(code);
-create index ix_operations_resource   on fhir.operations(resource);
+create index ix_fhir_operations_id         on fhir.fhir_operations(id);
+create index ix_fhir_operations_release    on fhir.fhir_operations(release);
+create index ix_fhir_operations_name       on fhir.fhir_operations(name);
+create index ix_fhir_operations_code       on fhir.fhir_operations(code);
+create index ix_fhir_operations_resource   on fhir.fhir_operations(resource);

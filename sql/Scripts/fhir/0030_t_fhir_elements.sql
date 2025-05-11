@@ -1,6 +1,6 @@
-drop table if exists fhir.elements cascade;
+drop table if exists fhir.fhir_elements cascade;
 
-create table fhir.elements as
+create table fhir.fhir_elements as
 select a.release                                  as release,
        regexp_replace(x.id, '\.[^.]+$', '')       as owner_id,
        x.id,
@@ -18,7 +18,7 @@ select a.release                                  as release,
        x.alias,
        x.min,
        x.max
-  from fhir.artifacts a,
+  from fhir.fhir_artifacts a,
   xmltable
   (
      xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition/*/fhir:element' 
@@ -41,10 +41,10 @@ select a.release                                  as release,
        max                   text path 'fhir:max/@value'
 ) x where a.filename in ('profiles-resources.xml', 'profiles-types.xml', 'profiles-others.xml');
 
-create index ix_elements_release on fhir.elements(release);
-create index ix_elements_owner_id on fhir.elements(owner_id);
-create index ix_elements_id on fhir.elements(id);
-create index ix_elements_root_owner_id on fhir.elements(root_owner_id);
-create index ix_elements_root_owner_url on fhir.elements(root_owner_url);
-create index ix_elements_fhir_version on fhir.elements(fhir_version);
-create index ix_elements_path on fhir.elements(path);
+create index ix_fhir_elements_release        on fhir.fhir_elements(release);
+create index ix_fhir_elements_owner_id       on fhir.fhir_elements(owner_id);
+create index ix_fhir_elements_id             on fhir.fhir_elements(id);
+create index ix_fhir_elements_root_owner_id  on fhir.fhir_elements(root_owner_id);
+create index ix_fhir_elements_root_owner_url on fhir.fhir_elements(root_owner_url);
+create index ix_fhir_elements_fhir_version   on fhir.fhir_elements(fhir_version);
+create index ix_fhir_elements_path           on fhir.fhir_elements(path);

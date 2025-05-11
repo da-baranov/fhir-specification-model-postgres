@@ -1,11 +1,11 @@
-drop table if exists fhir.interactions cascade;
+drop table if exists fhir.fhir_interactions cascade;
 
-create table fhir.interactions as
+create table fhir.fhir_interactions as
 select 
     a.release                as release,
     interactions.*
   from 
-    fhir.artifacts a,
+    fhir.fhir_artifacts a,
     xmltable
     (
       xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:CapabilityStatement/fhir:rest' 
@@ -24,6 +24,6 @@ select
     ) interactions
   where a.filename = 'profiles-resources.xml';
 
-create index ix_interactions_release on fhir.interactions(release);
-create index ix_interactions_type    on fhir.interactions(type);
-create index ix_interactions_code    on fhir.interactions(code);
+create index ix_fhir_interactions_release on fhir.fhir_interactions(release);
+create index ix_fhir_interactions_type    on fhir.fhir_interactions(type);
+create index ix_fhir_interactions_code    on fhir.fhir_interactions(code);
