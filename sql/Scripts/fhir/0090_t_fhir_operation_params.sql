@@ -1,8 +1,24 @@
-drop table if exists fhir.fhir_operation_params cascade;
+drop table if exists public.fhir_operation_params cascade;
 
-create table fhir.fhir_operation_params as
+create table public.fhir_operation_params
+(
+  release                    text not null,
+  fhir_version               text not null,
+  id                         text not null,
+  name                       text not null,
+  position                   int  not null,
+  use                        text,
+  min                        int,
+  max                        text,
+  documentation              text,
+  search_type                text,
+  resource                   text not null
+);
+
+insert into public.fhir_operation_params
 select 
     a.release,
+    p.fhir_version,
     p.id,
     p.name,
     p.position,
@@ -13,12 +29,13 @@ select
     p.search_type,
     t1.resource
   from 
-    fhir.fhir_artifacts a,
+    public.fhir_artifacts a,
     xmltable
     (
       xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:OperationDefinition/fhir:parameter' 
       passing a.file
       columns 
+        fhir_version         text path '../fhir:version/@value',
         id                   text path '../fhir:id/@value',
         position             int  path 'count(./preceding-sibling::fhir:parameter)+1',
         resource_str         text path 'concat(
@@ -45,7 +62,8 @@ select
     and t1.resource is not null
     and t1.resource <> '';
 
-create index ix_fhir_operation_params_release    on fhir.fhir_operation_params(release);
-create index ix_fhir_operation_params_id         on fhir.fhir_operation_params(id);
-create index ix_fhir_operation_params_name       on fhir.fhir_operation_params(name);
-create index ix_fhir_operation_params_resource   on fhir.fhir_operation_params(resource);
+create index ix_fhir_operation_params_release    on public.fhir_operation_params(release);
+create index ix_fhir_operation_params_fhir_version    on public.fhir_operation_params(fhir_version);
+create index ix_fhir_operation_params_id         on public.fhir_operation_params(id);
+create index ix_fhir_operation_params_name       on public.fhir_operation_params(name);
+create index ix_fhir_operation_params_resource   on public.fhir_operation_params(resource);

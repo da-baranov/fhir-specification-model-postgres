@@ -1,17 +1,29 @@
-drop table if exists fhir.fhir_element_types cascade;
+drop table if exists public.fhir_element_types cascade;
 
-create table fhir.fhir_element_types as
+create table public.fhir_element_types
+(
+  release                    text not null,
+  id                         text not null,
+  fhir_version               text not null,
+  kind                       text not null,
+  code                       text not null,
+  target_profile             text,
+  target_resource            text
+);
+
+insert into public.fhir_element_types
 with codes as
 (
   select a.release,
          x.*
-    from fhir.fhir_artifacts a,
+    from public.fhir_artifacts a,
     xmltable
     (
       xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition/*/fhir:element/fhir:type' 
       passing a.file
       columns 
         id                    text path '../@id',
+        fhir_version          text path '../../../fhir:fhirVersion/@value',
         kind                  text path 'name(../..)',
         code                  text path 'fhir:code[1]/@value'
     ) x
@@ -21,7 +33,7 @@ target_profiles as
 (
   select a.release,
          x.*
-    from fhir.fhir_artifacts a,
+    from public.fhir_artifacts a,
     xmltable
     (
       xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition/*/fhir:element/fhir:type/fhir:targetProfile' 
@@ -35,6 +47,7 @@ target_profiles as
 )
 select t.release,
        t.id,
+       t.fhir_version,
        t.kind,
        case
          when t.code = 'http://hl7.org/fhirpath/System.String'    then 'string'
@@ -53,9 +66,9 @@ select t.release,
     on (t.id = t1.id and t.release = t1.release and t.kind = t1.kind);
   
 
-create index ix_fhir_element_types_types_release         on fhir.fhir_element_types(release);
-create index ix_fhir_element_types_types_id              on fhir.fhir_element_types(id);
-create index ix_fhir_element_types_types_kind            on fhir.fhir_element_types(kind);
-create index ix_fhir_element_types_types_code            on fhir.fhir_element_types(code);
-create index ix_fhir_element_types_types_target_profile  on fhir.fhir_element_types(target_profile);
-create index ix_fhir_element_types_types_target_resource on fhir.fhir_element_types(target_resource);
+create index ix_fhir_element_types_types_release         on public.fhir_element_types(release);
+create index ix_fhir_element_types_types_id              on public.fhir_element_types(id);
+create index ix_fhir_element_types_types_kind            on public.fhir_element_types(kind);
+create index ix_fhir_element_types_types_code            on public.fhir_element_types(code);
+create index ix_fhir_element_types_types_target_profile  on public.fhir_element_types(target_profile);
+create index ix_fhir_element_types_types_target_resource on public.fhir_element_types(target_resource);

@@ -1,7 +1,26 @@
-drop table if exists fhir.fhir_types cascade;
+drop table if exists public.fhir_types cascade;
 
-create table fhir.fhir_types
-as
+create table public.fhir_types
+(
+  release                    text not null,
+  id                         text not null,
+  url                        text,
+  name                       text not null,
+  status                     text,
+  description                text,
+  purpose                    text,
+  fhir_version               text not null,
+  kind                       text not null,
+  abstract                   bool,
+  type                       text not null,
+  base_definition            text,
+  derivation                 text,
+  owner_type_id              text,
+  root_type_id               text,
+  others                     bool
+);
+
+insert into public.fhir_types
 
 /* SIMPLE AND COMPLEX TYPES */
 (
@@ -12,13 +31,13 @@ as
     null::text               as root_type_id,
     false                    as others
   from 
-  fhir.fhir_artifacts a,
+  public.fhir_artifacts a,
   xmltable
   (
     xmlnamespaces('http://hl7.org/fhir' as fhir, 'http://www.w3.org/1999/xhtml' as xhtml), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition' 
     passing a.file
     columns 
-      id                     text path 'fhir:id/@value',
+      id                     text not null path 'fhir:id/@value',
       url                    text path 'fhir:url/@value',
       name                   text path 'fhir:name/@value',
       status                 text path 'fhir:status/@value',
@@ -48,7 +67,7 @@ union all
       when a.filename = 'profiles-others.xml' then true
       else false  
     end                      as others
-    from fhir.fhir_artifacts a,
+    from public.fhir_artifacts a,
     xmltable
     (
       xmlnamespaces('http://hl7.org/fhir' as fhir, 'http://www.w3.org/1999/xhtml' as xhtml), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition' 
@@ -80,7 +99,7 @@ union all
     select
       a.release,
       x.*
-      from fhir.fhir_artifacts a,
+      from public.fhir_artifacts a,
            xmltable
            (
              xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition/*/fhir:element' 
@@ -119,11 +138,11 @@ union all
    where backbones.type = 'BackboneElement'
 );
 
-create index ix_fhir_types_release       on fhir.fhir_types(release);
-create index ix_fhir_types_fhir_version  on fhir.fhir_types(fhir_version);
-create index ix_fhir_types_id            on fhir.fhir_types(id);
-create index ix_fhir_types_url           on fhir.fhir_types(url);
-create index ix_fhir_types_name          on fhir.fhir_types(name);
-create index ix_fhir_types_owner_type_id on fhir.fhir_types(owner_type_id);
-create index ix_fhir_types_root_type_id  on fhir.fhir_types(root_type_id);
+create index ix_fhir_types_release       on public.fhir_types(release);
+create index ix_fhir_types_fhir_version  on public.fhir_types(fhir_version);
+create index ix_fhir_types_id            on public.fhir_types(id);
+create index ix_fhir_types_url           on public.fhir_types(url);
+create index ix_fhir_types_name          on public.fhir_types(name);
+create index ix_fhir_types_owner_type_id on public.fhir_types(owner_type_id);
+create index ix_fhir_types_root_type_id  on public.fhir_types(root_type_id);
 

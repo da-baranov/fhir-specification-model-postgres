@@ -1,4 +1,4 @@
-create table if not exists fhir.fhir_artifacts 
+create table if not exists public.fhir_artifacts 
 (
 	release    text not null,
 	filename   text not null,

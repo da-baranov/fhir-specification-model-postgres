@@ -1,12 +1,34 @@
-drop table if exists fhir.fhir_operations cascade;
+drop table if exists public.fhir_operations cascade;
 
-create table fhir.fhir_operations as
+create table public.fhir_operations
+(
+  release                    text not null,
+  id                         text not null,
+  use                        text,
+  url                        text not null,
+  fhir_version               text not null,
+  name                       text not null,
+  title                      text,
+  status                     text,
+  kind                       text,
+  experimental               bool,
+  description                text,
+  affects_state              bool,
+  code                       text not null,
+  comment                    text,
+  resource                   text not null,
+  system                     bool,
+  type                       bool,
+  instance                   bool
+);
+
+insert into public.fhir_operations
 select 
     a.release,
     op.id,
     op.use,
     op.url,
-    op.version,
+    op.fhir_version,
     op.name,
     op.title,
     op.status,
@@ -21,7 +43,7 @@ select
     op.type,
     op.instance
   from 
-    fhir.fhir_artifacts a,
+    public.fhir_artifacts a,
     xmltable
     (
       xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:OperationDefinition' 
@@ -30,7 +52,7 @@ select
         id                   text path 'fhir:id/@value',
         use                  text path 'fhir:extension[@url="http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status"][1]/fhir:valueCode/@value',
         url                  text path 'fhir:url/@value',
-        version              text path 'fhir:version/@value',
+        fhir_version         text path 'fhir:version/@value',
         name                 text path 'fhir:name/@value',
         title                text path 'fhir:title/@value',
         status               text path 'fhir:status/@value',
@@ -61,8 +83,9 @@ select
     and t1.resource is not null
     and t1.resource <> '';
 
-create index ix_fhir_operations_id         on fhir.fhir_operations(id);
-create index ix_fhir_operations_release    on fhir.fhir_operations(release);
-create index ix_fhir_operations_name       on fhir.fhir_operations(name);
-create index ix_fhir_operations_code       on fhir.fhir_operations(code);
-create index ix_fhir_operations_resource   on fhir.fhir_operations(resource);
+create index ix_fhir_operations_id         on public.fhir_operations(id);
+create index ix_fhir_operations_release    on public.fhir_operations(release);
+create index ix_fhir_operations_fhir_version    on public.fhir_operations(fhir_version);
+create index ix_fhir_operations_name       on public.fhir_operations(name);
+create index ix_fhir_operations_code       on public.fhir_operations(code);
+create index ix_fhir_operations_resource   on public.fhir_operations(resource);

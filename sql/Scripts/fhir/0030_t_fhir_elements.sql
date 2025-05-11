@@ -1,9 +1,32 @@
-drop table if exists fhir.fhir_elements cascade;
+drop table if exists public.fhir_elements cascade;
 
-create table fhir.fhir_elements as
+create table public.fhir_elements 
+(
+  release                    text not null,
+  owner_id                   text not null,
+  id                         text not null,
+  name                       text not null,
+  kind                       text not null,
+  root_owner_id              text not null,
+  root_owner_url             text not null, 
+  fhir_version               text not null,
+  position                   int  not null,
+  path                       text not null,
+  is_modifier                bool,
+  is_summary                 bool,
+  short                      text,
+  definition                 text,
+  comment                    text,
+  alias                      text,
+  min                        int,
+  max                        text
+);
+
+insert into public.fhir_elements
 select a.release                                  as release,
        regexp_replace(x.id, '\.[^.]+$', '')       as owner_id,
        x.id,
+       regexp_replace(x.id, '.*\.(.*?)', '\1')    as name,
        x.kind,
        x.root_owner_id,
        x.root_owner_url,
@@ -18,7 +41,7 @@ select a.release                                  as release,
        x.alias,
        x.min,
        x.max
-  from fhir.fhir_artifacts a,
+  from public.fhir_artifacts a,
   xmltable
   (
      xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition/*/fhir:element' 
@@ -41,10 +64,10 @@ select a.release                                  as release,
        max                   text path 'fhir:max/@value'
 ) x where a.filename in ('profiles-resources.xml', 'profiles-types.xml', 'profiles-others.xml');
 
-create index ix_fhir_elements_release        on fhir.fhir_elements(release);
-create index ix_fhir_elements_owner_id       on fhir.fhir_elements(owner_id);
-create index ix_fhir_elements_id             on fhir.fhir_elements(id);
-create index ix_fhir_elements_root_owner_id  on fhir.fhir_elements(root_owner_id);
-create index ix_fhir_elements_root_owner_url on fhir.fhir_elements(root_owner_url);
-create index ix_fhir_elements_fhir_version   on fhir.fhir_elements(fhir_version);
-create index ix_fhir_elements_path           on fhir.fhir_elements(path);
+create index ix_fhir_elements_release        on public.fhir_elements(release);
+create index ix_fhir_elements_owner_id       on public.fhir_elements(owner_id);
+create index ix_fhir_elements_id             on public.fhir_elements(id);
+create index ix_fhir_elements_root_owner_id  on public.fhir_elements(root_owner_id);
+create index ix_fhir_elements_root_owner_url on public.fhir_elements(root_owner_url);
+create index ix_fhir_elements_fhir_version   on public.fhir_elements(fhir_version);
+create index ix_fhir_elements_path           on public.fhir_elements(path);

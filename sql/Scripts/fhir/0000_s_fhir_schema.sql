@@ -1,1 +1,1 @@
-create schema if not exists fhir;
+create schema if not exists public;

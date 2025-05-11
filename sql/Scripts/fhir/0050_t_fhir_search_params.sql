@@ -1,13 +1,30 @@
-drop table if exists fhir.fhir_search_params cascade;
+drop table if exists public.fhir_search_params cascade;
 
-create table fhir.fhir_search_params
-as
+create table public.fhir_search_params
+(
+  release                    text not null,
+  id                         text not null,
+  use                        text not null,
+  url                        text not null,
+  fhir_version               text not null,
+  name                       text not null,
+  status                     text not null,
+  experimental               bool,
+  description                text,
+  code                       text not null,
+  type                       text not null,
+  processing_mode            text,
+  expression                 text,
+  base                       text
+);
+
+insert into public.fhir_search_params
   select 
-    a.release              as release,
+    a.release                as release,
     x.id,
     x.use,
     x.url,
-    x.version,
+    x.version                as fhir_version,
     x.name,
     x.status,
     x.experimental,
@@ -17,7 +34,7 @@ as
     x.processing_mode,
     t1.*
   from 
-  fhir.fhir_artifacts a,
+  public.fhir_artifacts a,
   xmltable
   (
     xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:SearchParameter' 
@@ -55,7 +72,8 @@ as
                                         fhir:base[96]/@value,",",fhir:base[97]/@value,",",fhir:base[98]/@value,",",fhir:base[99]/@value,",",fhir:base[100]/@value
                                       )',
       type                 text path 'fhir:type/@value',
-      processing_mode      text path 'fhir:processingMode/@value'
+      processing_mode      text path 'fhir:processingMode/@value',
+      expression           text path 'fhir:expression/@value'
   ) x,
   string_to_table(x.base, ',') as t1(base)
   where a.filename = 'search-parameters.xml'
@@ -63,9 +81,10 @@ as
     and t1.base <> '';
 
 
-create index idx_fhir_search_params_id   on fhir.fhir_search_params(id);
-create index idx_fhir_search_params_url  on fhir.fhir_search_params(url);
-create index idx_fhir_search_params_name on fhir.fhir_search_params(name);
-create index idx_fhir_search_params_code on fhir.fhir_search_params(code);
-create index idx_fhir_search_params_base on fhir.fhir_search_params(base);
-create index idx_fhir_search_params_type on fhir.fhir_search_params(type);
+create index idx_fhir_search_params_id   on public.fhir_search_params(id);
+create index idx_fhir_search_params_url  on public.fhir_search_params(url);
+create index idx_fhir_search_params_name on public.fhir_search_params(name);
+create index idx_fhir_search_params_fhir_version on public.fhir_search_params(fhir_version);
+create index idx_fhir_search_params_code on public.fhir_search_params(code);
+create index idx_fhir_search_params_base on public.fhir_search_params(base);
+create index idx_fhir_search_params_type on public.fhir_search_params(type);

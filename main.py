@@ -74,7 +74,7 @@ def exec_script(conn, path):
     with io.open(path,'r',encoding='utf8') as f:
         script = f.read()
         script = script.replace("create schema if not exists fhir", "create schema if not exists " + schema)
-        script = script.replace(" fhir.", " " + schema + ".")
+        script = script.replace(" public.", " " + schema + ".")
 
         cur = conn.cursor()
         cur.execute(script)
@@ -101,8 +101,8 @@ def create_tables():
 def main():
     load_dotenv() 
     create_schema()
-    #download_artifacts()
-    #upload_artifacts()
+    download_artifacts()
+    upload_artifacts()
     create_tables()
     
 main()
