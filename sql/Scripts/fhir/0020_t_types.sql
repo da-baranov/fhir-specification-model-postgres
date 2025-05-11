@@ -31,7 +31,7 @@ as
 	    type                   text path 'fhir:type/@value',
 	    base_definition        text path 'fhir:baseDefinition/@value',
 	    derivation             text path 'fhir:derivation/@value'
-	    -- , "text"            text path 'fhir:text/xhtml:div'
+	    -- , "text"            xml  path 'fhir:text/xhtml:div'
 	) x
 	where a.filename = 'profiles-types.xml'
 )
@@ -46,7 +46,7 @@ union all
     null::text               as owner_type_id,
     null::text               as root_type_id,
     case 
-      when a.filename = 'profiles-resources.xml' then true
+      when a.filename = 'profiles-others.xml' then true
       else false  
     end                      as others
     from fhir.artifacts a,
@@ -112,7 +112,7 @@ union all
 	       backbones.id                                    as type,
 	       null::text                                      as base_definition,
 	       null::text                                      as derivation,
-	       -- null                                            as "text",
+	       -- null                                         as "text",
          regexp_replace(backbones.id, '\.[^.]+$', '')    as owner_type_id, -- for ValueSet.compose.include.concept.designation -> ValueSet.compose.include.concept
          regexp_substr(backbones.id, '^([^.]+)')         as root_type_id,  -- for ValueSet.compose.include.concept.designation -> ValueSet
          false                                           as others

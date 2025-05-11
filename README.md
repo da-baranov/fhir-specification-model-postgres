@@ -6,7 +6,7 @@ This project is designed to transform HL7 FHIR standard release models into a re
 
 ## Examples
 
-**Select a list of FHIR simple types**
+**Select a list of FHIR R4 simple types**
 
 ```sql
 select t.*
@@ -15,7 +15,7 @@ select t.*
    and t.kind = 'primitive-type'
 ```
 
-**Select a list of FHIR resources**
+**Select a list of FHIR R4 resources**
 
 ```sql
 select t.*
@@ -24,7 +24,7 @@ select t.*
    and t.kind = 'resource'
 ```
 
-**Select a list of FHIR elements of the Patient resource**
+**Select a list of FHIR R5 elements of the Patient resource**
 
 ```sql
 select t.*
@@ -44,6 +44,23 @@ select t.*
    and t.kind = 'snapshot'
    and t.id = 'Encounter.subject'
 ```
+
+**Select a list of R4 Account resource search parameters**
+
+```sql
+select * 
+  from fhir.search_params 
+ where release = 'R4' 
+   and base = 'Account'
+```
+
+## DDL generation
+
+
+## Docker support
+
+Not planned.
+
 
 
 
