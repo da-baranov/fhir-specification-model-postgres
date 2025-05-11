@@ -84,6 +84,7 @@ def exec_script(conn, path):
 def create_schema():
     conn = db_connect()
     exec_script(conn, "sql/Scripts/fhir/0000_s_fhir_schema.sql")
+    exec_script(conn, "sql/Scripts/fhir/0005_t_fhir_releases.sql")
     exec_script(conn, "sql/Scripts/fhir/0010_t_fhir_artifacts.sql")
 
 def create_tables():
