@@ -63,8 +63,8 @@ as
     and t1.base <> '';
 
 
-create index idx_search_params_id on fhir.search_params(id);
-create index idx_search_params_url on fhir.search_params(url);
+create index idx_search_params_id   on fhir.search_params(id);
+create index idx_search_params_url  on fhir.search_params(url);
 create index idx_search_params_name on fhir.search_params(name);
 create index idx_search_params_code on fhir.search_params(code);
 create index idx_search_params_base on fhir.search_params(base);

@@ -6,46 +6,53 @@ as
 /* SIMPLE AND COMPLEX TYPES */
 (
 	select 
-	  a.release              as release,
+	  a.release                as release,
 	  x.*,
-	  null::text             as owner_type_id,
-	  null::text             as root_type_id
+	  null::text               as owner_type_id,
+	  null::text               as root_type_id,
+	  false                    as others
+	  
 	from 
 	fhir.artifacts a,
 	xmltable
 	(
-	  xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition' 
+	  xmlnamespaces('http://hl7.org/fhir' as fhir, 'http://www.w3.org/1999/xhtml' as xhtml), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition' 
 	  passing a.file
 	  columns 
-	    id                   text path 'fhir:id/@value',
-	    url                  text path 'fhir:url/@value',
-	    name                 text path 'fhir:name/@value',
-	    status               text path 'fhir:status/@value',
-	    description          text path 'fhir:description/@value',
-	    purpose              text path 'fhir:purpose/@value',
-	    fhir_version         text path 'fhir:fhirVersion/@value',
-	    kind                 text path 'fhir:kind/@value',
-      abstract             boolean path 'boolean(fhir:abstract/@value)',
-	    type                 text path 'fhir:type/@value',
-	    base_definition      text path 'fhir:baseDefinition/@value',
-	    derivation           text path 'fhir:derivation/@value'
+	    id                     text path 'fhir:id/@value',
+	    url                    text path 'fhir:url/@value',
+	    name                   text path 'fhir:name/@value',
+	    status                 text path 'fhir:status/@value',
+	    description            text path 'fhir:description/@value',
+	    purpose                text path 'fhir:purpose/@value',
+	    fhir_version           text path 'fhir:fhirVersion/@value',
+	    kind                   text path 'fhir:kind/@value',
+      abstract               bool path 'boolean(fhir:abstract/@value)',
+	    type                   text path 'fhir:type/@value',
+	    base_definition        text path 'fhir:baseDefinition/@value',
+	    derivation             text path 'fhir:derivation/@value'
+	    -- , "text"            text path 'fhir:text/xhtml:div'
 	) x
 	where a.filename = 'profiles-types.xml'
 )
   
-union
+union all
 
 /* RESOURCES */
 (
 	select
 	  a.release,
 	  x.*,
-    null::text        as owner_type_id,
-    null::text         as root_type_id
-	  from fhir.artifacts a,
+    null::text               as owner_type_id,
+    null::text               as root_type_id,
+    case 
+      when a.filename = 'profiles-resources.xml' then true
+      else false  
+    end                      as others
+    from fhir.artifacts a,
 	xmltable
 	(
-	  xmlnamespaces('http://hl7.org/fhir' as fhir), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition' 
+	  xmlnamespaces('http://hl7.org/fhir' as fhir, 'http://www.w3.org/1999/xhtml' as xhtml), '/fhir:Bundle/fhir:entry/fhir:resource/fhir:StructureDefinition' 
 	  passing a.file
 	  columns 
       id                     text path 'fhir:id/@value',
@@ -56,15 +63,16 @@ union
       purpose                text path 'fhir:purpose/@value',
       fhir_version           text path 'fhir:fhirVersion/@value',
       kind                   text path 'fhir:kind/@value',
-      abstract               boolean path 'boolean(fhir:abstract/@value)',
+      abstract               bool path 'boolean(fhir:abstract/@value)',
       type                   text path 'fhir:type/@value',
       base_definition        text path 'fhir:baseDefinition/@value',
       derivation             text path 'fhir:derivation/@value'
+      -- , "text"            xml  path 'fhir:text/xhtml:div'
 	) x
-	where a.filename = 'profiles-resources.xml'
+	where a.filename in ('profiles-resources.xml', 'profiles-others.xml')
 )
 
-union 
+union all
 
 /* BACKBONES */
 (
@@ -87,6 +95,7 @@ union
                definition    text path 'fhir:definition/@value',
                comment       text path 'fhir:comment/@value',
                type          text path 'fhir:type[1]/fhir:code/@value'
+               -- , "text"   xml  path 'fhir:dummy'
 		        ) x
 		   where a.filename = 'profiles-resources.xml'
 	)
@@ -103,8 +112,10 @@ union
 	       backbones.id                                    as type,
 	       null::text                                      as base_definition,
 	       null::text                                      as derivation,
+	       -- null                                            as "text",
          regexp_replace(backbones.id, '\.[^.]+$', '')    as owner_type_id, -- for ValueSet.compose.include.concept.designation -> ValueSet.compose.include.concept
-         regexp_substr(backbones.id, '^([^.]+)')         as root_type_id   -- for ValueSet.compose.include.concept.designation -> ValueSet
+         regexp_substr(backbones.id, '^([^.]+)')         as root_type_id,  -- for ValueSet.compose.include.concept.designation -> ValueSet
+         false                                           as others
 	  from tmp backbones
 	 where backbones.type = 'BackboneElement'
 );

@@ -39,7 +39,7 @@ select a.release                                  as release,
        alias                 text path 'fhir:alias[1]/@value',
        min                   int  path 'fhir:min/@value',
        max                   text path 'fhir:max/@value'
-) x where a.filename in ('profiles-resources.xml', 'profiles-types.xml');
+) x where a.filename in ('profiles-resources.xml', 'profiles-types.xml', 'profiles-others.xml');
 
 create index ix_elements_release on fhir.elements(release);
 create index ix_elements_owner_id on fhir.elements(owner_id);
