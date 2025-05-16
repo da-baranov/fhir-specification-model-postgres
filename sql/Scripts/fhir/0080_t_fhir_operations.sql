@@ -62,26 +62,14 @@ select
         affects_state        bool path 'boolean(fhir:affectsState/@value)',
         code                 text path 'fhir:code/@value',
         comment              text path 'fhir:comment/@value',
-        resource_str         text path 'concat(
-                                          fhir:resource[1]/@value,",",
-                                          fhir:resource[2]/@value,",",
-                                          fhir:resource[3]/@value,",",
-                                          fhir:resource[4]/@value,",",
-                                          fhir:resource[5]/@value,",",
-                                          fhir:resource[6]/@value,",",
-                                          fhir:resource[7]/@value,",",
-                                          fhir:resource[8]/@value,",",
-                                          fhir:resource[9]/@value,",",
-                                          fhir:resource[10]/@value,","
-                                        )',
         system               bool path 'boolean(fhir:system/@value)',
         type                 bool path 'boolean(fhir:type/@value)',
-        instance             bool path 'boolean(fhir:instance/@value)'        
+        instance             bool path 'boolean(fhir:instance/@value)',
+        self                 xml  path '.'
     ) op,
-  string_to_table(op.resource_str, ',') as t1(resource)  
-  where a.filename = 'profiles-resources.xml'
-    and t1.resource is not null
-    and t1.resource <> '';
+  unnest(xpath('/fhir:OperationDefinition/fhir:resource/@value', op.self, ARRAY[ARRAY['fhir', 'http://hl7.org/fhir']])) as t1(resource)  
+  where a.filename = 'profiles-resources.xml';
+
 
 create index ix_fhir_operations_id         on public.fhir_operations(id);
 create index ix_fhir_operations_release    on public.fhir_operations(release);

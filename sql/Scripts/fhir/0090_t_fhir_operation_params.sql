@@ -38,29 +38,16 @@ select
         fhir_version         text path '../fhir:version/@value',
         id                   text path '../fhir:id/@value',
         position             int  path 'count(./preceding-sibling::fhir:parameter)+1',
-        resource_str         text path 'concat(
-                                          ../fhir:resource[1]/@value,",",
-                                          ../fhir:resource[2]/@value,",",
-                                          ../fhir:resource[3]/@value,",",
-                                          ../fhir:resource[4]/@value,",",
-                                          ../fhir:resource[5]/@value,",",
-                                          ../fhir:resource[6]/@value,",",
-                                          ../fhir:resource[7]/@value,",",
-                                          ../fhir:resource[8]/@value,",",
-                                          ../fhir:resource[9]/@value,",",
-                                          ../fhir:resource[10]/@value,","
-                                        )',
         name                 text path 'fhir:name/@value',
         use                  text path 'fhir:use/@value',
         min                  int  path 'fhir:min/@value',
         max                  text path 'fhir:max/@value',
         documentation        text path 'fhir:documentation/@value',
-        search_type          text path 'fhir:searchType/@value'
+        search_type          text path 'fhir:searchType/@value',
+        op                   xml  path '..'
     ) p,
-  string_to_table(p.resource_str, ',') as t1(resource)  
-  where a.filename = 'profiles-resources.xml'
-    and t1.resource is not null
-    and t1.resource <> '';
+  unnest(xpath('/fhir:OperationDefinition/fhir:resource/@value', p.op, ARRAY[ARRAY['fhir', 'http://hl7.org/fhir']])) as t1(resource) 
+  where a.filename = 'profiles-resources.xml';
 
 create index ix_fhir_operation_params_release    on public.fhir_operation_params(release);
 create index ix_fhir_operation_params_fhir_version    on public.fhir_operation_params(fhir_version);
