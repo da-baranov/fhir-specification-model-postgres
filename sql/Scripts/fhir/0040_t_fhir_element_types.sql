@@ -50,6 +50,7 @@ select t.release,
        t.fhir_version,
        t.kind,
        case
+         when t.code = 'BackboneElement'                          then t.id
          when t.code = 'http://hl7.org/fhirpath/System.String'    then 'string'
          when t.code = 'http://hl7.org/fhirpath/System.DateTime'  then 'dateTime'
          when t.code = 'http://hl7.org/fhirpath/System.Time'      then 'time'

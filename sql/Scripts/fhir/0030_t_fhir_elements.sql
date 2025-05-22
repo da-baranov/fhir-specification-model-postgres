@@ -3,12 +3,11 @@ drop table if exists public.fhir_elements cascade;
 create table public.fhir_elements 
 (
   release                    text not null,
-  owner_id                   text not null,
   id                         text not null,
+  root_type_id               text not null,
+  owner_type_id              text not null,
   name                       text not null,
   kind                       text not null,
-  root_owner_id              text not null,
-  root_owner_url             text not null, 
   fhir_version               text not null,
   position                   int  not null,
   path                       text not null,
@@ -23,13 +22,12 @@ create table public.fhir_elements
 );
 
 insert into public.fhir_elements
-select a.release                                  as release,
-       regexp_replace(x.id, '\.[^.]+$', '')       as owner_id,
-       x.id,
-       regexp_replace(x.id, '.*\.(.*?)', '\1')    as name,
+select a.release,
+       x.id                                            as id,
+       regexp_replace(x.id, '([^.]+)(\..*)', '\1')     as root_type_id,
+       regexp_replace(x.id, '(.*)\.(.*?)', '\1')       as owner_type_id,
+       regexp_replace(x.id, '.*\.(.*?)', '\1')         as name,
        x.kind,
-       x.root_owner_id,
-       x.root_owner_url,
        x.fhir_version,
        x.position,
        x.path,
@@ -49,8 +47,6 @@ select a.release                                  as release,
      columns 
        id                    text path '@id',
        kind                  text path 'name(..)',
-       root_owner_id         text path '../../fhir:id/@value',
-       root_owner_url        text path '../../fhir:url/@value',
        fhir_version          text path '../../fhir:fhirVersion/@value',
        position              int  path 'count(./preceding-sibling::fhir:element)+1',
        path                  text path 'fhir:path/@value',
@@ -64,10 +60,12 @@ select a.release                                  as release,
        max                   text path 'fhir:max/@value'
 ) x where a.filename in ('profiles-resources.xml', 'profiles-types.xml', 'profiles-others.xml');
 
+delete from public.fhir_elements 
+ where id = root_type_id;
+
 create index ix_fhir_elements_release        on public.fhir_elements(release);
-create index ix_fhir_elements_owner_id       on public.fhir_elements(owner_id);
 create index ix_fhir_elements_id             on public.fhir_elements(id);
-create index ix_fhir_elements_root_owner_id  on public.fhir_elements(root_owner_id);
-create index ix_fhir_elements_root_owner_url on public.fhir_elements(root_owner_url);
+create index ix_fhir_elements_root_type_id   on public.fhir_elements(root_type_id);
+create index ix_fhir_elements_owner_type_id  on public.fhir_elements(owner_type_id);
 create index ix_fhir_elements_fhir_version   on public.fhir_elements(fhir_version);
 create index ix_fhir_elements_path           on public.fhir_elements(path);

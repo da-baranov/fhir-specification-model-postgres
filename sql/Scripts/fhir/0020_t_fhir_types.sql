@@ -125,7 +125,7 @@ union all
          backbones.definition                            as description,
          null::text                                      as purpose,
          backbones.fhir_version                          as fhir_version,
-         'backbone'::text                                as kind,
+         'backbone-element'::text                        as kind,
          false                                           as abstract,
          backbones.id                                    as type,
          null::text                                      as base_definition,
@@ -136,6 +136,7 @@ union all
          false                                           as others
     from tmp backbones
    where backbones.type = 'BackboneElement'
+     and backbones.kind = 'snapshot'
 );
 
 create index ix_fhir_types_release       on public.fhir_types(release);
